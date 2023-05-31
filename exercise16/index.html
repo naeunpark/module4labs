@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fake E-commerce</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    <link rel="stylesheet" href="./style.css">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
+</head>
+
+<body>
+    <template>
+        <div class="col-lg-3 col-md-4 col-sm-6 mb-3">
+            <div class="card h-100 shadow">
+                <div class="card-img-top"></div>
+                <div class="card-body d-flex flex-column justify-content-between">
+                    <h5 class="card-title"></h5>
+                    <h6 class="card-price"></h6>
+                    <p class="card-description"></p>
+                    <a href="#" class="btn btn-success">Buy Now</a>
+                </div>
+            </div>
+        </div>
+    </template>
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <div class="container-fluid">
+            <a class="navbar-brand " href="#">
+                <img class="" src="" alt="logo">
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+          </button>
+            <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                    <li class="nav-item">
+                        <a class="nav-link active" aria-current="page" href="#">Home</a>
+                    </li>
+
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            Categories
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+                        </ul>
+                    </li>
+                </ul>
+                <form class="d-flex">
+                    <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search">
+                    <button class="btn btn-outline-success" type="submit">Search</button>
+                </form>
+            </div>
+        </div>
+    </nav>
+    <div class="container"></div>
+
+
+    <script>
+        const container = document.querySelector(".container");
+        const dropdown = document.querySelector('.dropdown-menu');
+        let categories = [];
+        let filteredCategories = [];
+        let items;
+
+        //Get product's categories from array filteredCategories.
+        function fetchCategory(category) {
+            let categoryMenu = document.createElement('li');
+            let aTag = document.createElement('a');
+            categoryMenu.classList.add("dropdown-item");
+            aTag.innerText = category.toUpperCase();
+            aTag.href = `#${categoryPattern(category)}`;
+            categoryMenu.appendChild(aTag);
+            dropdown.appendChild(categoryMenu);
+            categories.push(category);
+        }
+
+        function categoryPattern(category) {
+            category = category.replaceAll(' ', '');
+            category = category.replaceAll("'", "");
+            return category;
+        }
+
+        // make a container categorized by category
+        function containersByCategory(category) {
+            const row = document.createElement('div');
+            const h1Category = document.createElement('h1');
+            row.classList.add("row", "pt-5", "pb-5");
+            row.id = categoryPattern(category);
+            h1Category.innerText = category.toUpperCase();
+            row.appendChild(h1Category);
+            container.appendChild(row);
+        }
+
+        //Get Products data from fakestoreapi and fetch it to the html.
+        function fetchProducts(json) {
+            const template = document.querySelector('template').content.cloneNode(true);
+            const productCategory = categoryPattern(json.category);
+            const productCategoryContainer = container.querySelector(`#${productCategory}`);
+
+            template.querySelector('.card-title').innerText = json.title;
+            template.querySelector('.card-description').innerText = json.description;
+            template.querySelector('.card-img-top').style.backgroundImage = `url(${json.image})`;
+            template.querySelector('.card-price').innerText = `$${json.price}`;
+            productCategoryContainer.appendChild(template);
+        }
+
+        fetch('https://fakestoreapi.com/products')
+            .then(res => res.json())
+            .then((json) => {
+                json.forEach(item => categories.push(item.category))
+                filteredCategories = [...new Set(categories)];
+                items = json;
+            })
+            .then(() => filteredCategories.forEach(category => fetchCategory(category)))
+            .then(() => filteredCategories.forEach(category => containersByCategory(category)))
+            .then(() => items.forEach(item => fetchProducts(item)))
+    </script>
+</body>
+
+</html>
